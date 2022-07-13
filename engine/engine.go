@@ -8,6 +8,6 @@ type Engine interface {
 	Run()
 }
 
-type GetEngineFactory interface {
-	GetEngine() Engine
-}
+//type GetEngineFactory interface {
+//	GetEngine() Engine
+//}

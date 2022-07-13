@@ -11,7 +11,7 @@ type NativeChanPipeline struct {
 }
 
 func (np *NativeChanPipeline) ProcessItem(item *httpobj.Item) error {
-	log.Printf("Native Got item: #: %v\n", item)
+	log.Printf("Native Got item: %v\n", item)
 	return nil
 }
 
@@ -20,7 +20,7 @@ func (np *NativeChanPipeline) SubmitItem(item *httpobj.Item) {
 }
 
 func (np *NativeChanPipeline) Run() {
-	np.itemChan = make(chan *httpobj.Item)
+	//np.itemChan = make(chan *httpobj.Item)
 	for item := range np.itemChan{
 		err := np.ProcessItem(item)
 		if err != nil {
@@ -30,7 +30,13 @@ func (np *NativeChanPipeline) Run() {
 }
 
 
-type NativeChanPipelineFactory struct {}
-func (pipeline *NativeChanPipelineFactory) GetPipeline() Pipeline {
-	return &NativeChanPipeline{}
+//type NativeChanPipelineFactory struct {}
+//func (pipeline *NativeChanPipelineFactory) GetPipeline() Pipeline {
+//	return &NativeChanPipeline{}
+//}
+
+func NewNativeChanPipeline() *NativeChanPipeline {
+	return &NativeChanPipeline{
+		itemChan: make(chan *httpobj.Item),
+	}
 }

@@ -10,7 +10,7 @@ import (
 // ChanScheduler 使用channel作为内置队列的调度器
 type ChanScheduler struct {
 	requestChan          chan *httpobj.Request      // 请求对象队列
-	trackerSchedulerChan chan chan *httpobj.Request //
+	trackerSchedulerChan chan chan *httpobj.Request // tracker channel
 }
 
 func (scheduler *ChanScheduler) Submit(request *httpobj.Request) {
@@ -27,8 +27,8 @@ func (scheduler *ChanScheduler) TrackerReady(w chan *httpobj.Request) {
 }
 
 func (scheduler *ChanScheduler) Run() {
-	scheduler.requestChan = make(chan *httpobj.Request)               // 请求channel
-	scheduler.trackerSchedulerChan = make(chan chan *httpobj.Request) // tracker channel
+	//scheduler.requestChan = make(chan *httpobj.Request)               // 请求channel
+	//scheduler.trackerSchedulerChan = make(chan chan *httpobj.Request) // tracker channel
 
 	// 创建请求队列和工作队列
 	var workerQ []chan *httpobj.Request
@@ -80,7 +80,14 @@ func (scheduler *ChanScheduler) Run() {
 	}()
 }
 
-type ChanSchedulerFactory struct {}
-func (scheduler *ChanSchedulerFactory) GetScheduler() Scheduler {
-	return &ChanScheduler{}
+//type ChanSchedulerFactory struct {}
+//func (scheduler *ChanSchedulerFactory) GetScheduler() Scheduler {
+//	return &ChanScheduler{}
+//}
+
+func NewChanScheduler() *ChanScheduler {
+	return &ChanScheduler{
+		requestChan: make(chan *httpobj.Request),
+		trackerSchedulerChan: make(chan chan *httpobj.Request),
+	}
 }

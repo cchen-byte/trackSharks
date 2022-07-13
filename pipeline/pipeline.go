@@ -10,6 +10,6 @@ type Pipeline interface {
 	Run()
 }
 
-type GetPipelineFactory interface {
-	GetPipeline() Pipeline
-}
+//type GetPipelineFactory interface {
+//	GetPipeline() Pipeline
+//}

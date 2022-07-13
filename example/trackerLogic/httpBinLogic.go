@@ -1,22 +1,26 @@
 package trackerLogic
 
 import (
-	"github.com/cchen-byte/trackeSharkes/constructor"
-	"github.com/cchen-byte/trackeSharkes/downloader"
-	exampleMiddlewares "github.com/cchen-byte/trackeSharkes/example/middleware"
+	exampleMiddleware "github.com/cchen-byte/trackeSharkes/example/middleware"
 	"github.com/cchen-byte/trackeSharkes/httpobj"
 	"github.com/cchen-byte/trackeSharkes/middleware"
 )
 
-type HttpBinLogic struct {
-	constructor.BaseTrackerLogic
+func init(){
+	var hbUrlMiddleware = new(exampleMiddleware.HBUrlMiddleware)
+	// 注册中间件
+	middleware.TrackerMiddlewaresManager.MiddlewaresMap.Store("hbUrlMiddleware", hbUrlMiddleware)
 }
 
-func (trackerLogic *HttpBinLogic) ConstructFirstRequest (httpobj.TrackData) *httpobj.Request {
+type HttpBinLogic1 struct {
+	DownloaderMiddleware map[string]middleware.Middlewares
+}
+
+func (trackerLogic *HttpBinLogic1) ConstructFirstRequest (httpobj.TrackData) *httpobj.Request {
 	return &httpobj.Request{
 		Url:      "https://httpbin.org",
 		DownloadMiddlewares: map[string]int{
-			"middleware.HBUrlMiddleware": 101,
+			"hbUrlMiddleware": 101,
 		},
 		Callback: Parse,
 	}
@@ -25,6 +29,9 @@ func (trackerLogic *HttpBinLogic) ConstructFirstRequest (httpobj.TrackData) *htt
 // Parse 解析返回的响应
 func Parse(response *httpobj.Response) (*httpobj.ParseResult, error) {
 	respJsonDom, _ := response.GetJsonDom()
+	//if err != nil{
+	//
+	//}
 	tracId := respJsonDom.XpathOne("headers/X-Amzn-Trace-Id").InnerText()
 	itemData := &httpobj.Item{
 		"TracId": tracId,
@@ -35,13 +42,7 @@ func Parse(response *httpobj.Response) (*httpobj.ParseResult, error) {
 	return result, nil
 }
 
-func NewLogic() *HttpBinLogic {
-	downloaderFactory := &downloader.NetDownloaderFactory{}
-	httpBinLogic := &HttpBinLogic{}
-	httpBinLogic.TrackerDownloader = downloaderFactory.GetDownloader()
-	httpBinLogic.TrackerDownloaderMiddlewares = map[string]middleware.Middlewares{
-		"HBUrlMiddleware": &exampleMiddlewares.HBUrlMiddleware{},
-	}
-	httpBinLogic.TrackerMiddlewaresManager = &middleware.Manager{}
+func NewLogic() *HttpBinLogic1 {
+	httpBinLogic := &HttpBinLogic1{}
 	return httpBinLogic
 }

@@ -22,7 +22,7 @@ type Request struct {
 
 	DownloadMiddlewares map[string]int	// 下载中间件
 
-	Export *Export // 需要导出的字段, 配置化/多步请求依赖前几步请求结果时 会用上
+	MetaData *MetaData // 需要传递的元数据, 配置化/多步请求依赖前几步请求结果时 会用上
 
 	IsRetry bool	// 是否重试
 	RetryTimes int // 重试次数
@@ -42,5 +42,5 @@ func (request *Request) ToValues(args map[string]interface{}) string {
 }
 
 
-// Export 导出的字段
-type Export map[string]interface{}
+// MetaData 导出的字段
+type MetaData map[string]interface{}

@@ -18,6 +18,6 @@ type ReadyNotifier interface {
 }
 
 
-type GetSchedulerFactory interface {
-	GetScheduler() Scheduler
-}
+//type GetSchedulerFactory interface {
+//	GetScheduler() Scheduler
+//}
