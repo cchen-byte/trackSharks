@@ -13,7 +13,6 @@ func init(){
 }
 
 type HttpBinLogic1 struct {
-	DownloaderMiddleware map[string]middleware.Middlewares
 }
 
 func (trackerLogic *HttpBinLogic1) ConstructFirstRequest (httpobj.TrackData) *httpobj.Request {
