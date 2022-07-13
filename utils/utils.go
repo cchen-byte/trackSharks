@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
 	"sort"
 )
 
@@ -28,12 +27,6 @@ func SortMapByValue(m map[string]int) PairList {
 	}
 	sort.Sort(p)
 	return p
-}
-
-func Loads(jsonData []byte) map[string]interface{} {
-	var v interface{}
-	json.Unmarshal(jsonData, &v)
-	return v.(map[string]interface{})
 }
 
 // Md5V md5

@@ -7,8 +7,3 @@ import (
 type Downloader interface {
 	Fetch(request *httpobj.Request) (*httpobj.Response, error)
 }
-
-
-type GetDownloaderFactory interface {
-	GetDownloader() Downloader
-}

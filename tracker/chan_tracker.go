@@ -1,8 +1,6 @@
 package tracker
 
 import (
-	"fmt"
-	"github.com/cchen-byte/trackeSharkes/constructor"
 	"github.com/cchen-byte/trackeSharkes/downloader"
 	"github.com/cchen-byte/trackeSharkes/engine"
 	"github.com/cchen-byte/trackeSharkes/httpobj"
@@ -31,27 +29,12 @@ func (tracker *ChanTracker) parseWork(request *httpobj.Request, resp *httpobj.Re
 	return request.Callback(resp)
 }
 
-func (tracker *ChanTracker) Run(trackerLogicUtils constructor.TrackerLogicUtils, request *httpobj.Request) (*httpobj.ParseResult, error) {
+func (tracker *ChanTracker) Run(trackerMiddlewaresManager *middleware.Manager, request *httpobj.Request) (*httpobj.ParseResult, error) {
 	var downloadMiddlewares []middleware.Middlewares
-
-	//// 当请求未携带下载中间件信息, 直接下载并解析
-	//if len(request.DownloadMiddlewares) == 0 {
-	//	resp, err := worker.fetchWork(request)
-	//	if err != nil {
-	//		log.Printf("Fetch error: %s, request.Url: %s\n", err.Error(), request.Url)
-	//		return nil, err
-	//	}
-	//	parseResult, err := worker.parseWork(request, resp)
-	//	if err != nil {
-	//		log.Printf("Parse error: %s, request.Url: %s\n", err.Error(), request.Url)
-	//		return nil, err
-	//	}
-	//	return parseResult, nil
-	//}
 
 	// 获取该请求对应的中间件
 	var err error
-	downloadMiddlewares, err = trackerLogicUtils.GetRequestsDownloaderMiddlewares(request.DownloadMiddlewares)
+	downloadMiddlewares, err = trackerMiddlewaresManager.GetMiddlewares(request.DownloadMiddlewares)
 	if err != nil {
 		log.Printf("Get Middlewares error: %s, request.Url: %s\n", err.Error(), request.Url)
 		return nil, err
@@ -114,11 +97,7 @@ func handleResponse(resp *httpobj.Response) (*httpobj.ParseResult, error) {
 
 
 // CreateChanTracker 创建ChanTracker
-func CreateChanTracker(trackerLogicUtils constructor.TrackerLogicUtils, schedulerTrackerChan chan *httpobj.Request, engine engine.Engine, ready scheduler.ReadyNotifier) {
-	trackerDownloader, err := trackerLogicUtils.GetTrackerDownloader()
-	if err != nil{
-		panic(fmt.Sprintf("Tracker get downloader err: %s\n", err.Error()))
-	}
+func CreateChanTracker(trackerDownloader downloader.Downloader, trackerMiddlewaresManager *middleware.Manager, schedulerTrackerChan chan *httpobj.Request, engine engine.Engine, ready scheduler.ReadyNotifier) {
 	// tracker 下载器使用爬虫对应的下载器
 	cTracker := &ChanTracker{
 		Downloader: trackerDownloader,
@@ -129,7 +108,7 @@ func CreateChanTracker(trackerLogicUtils constructor.TrackerLogicUtils, schedule
 			// 调度器内无请求则一直阻塞
 			request := <-schedulerTrackerChan
 
-			result, err := tracker.Run(trackerLogicUtils, request)
+			result, err := tracker.Run(trackerMiddlewaresManager, request)
 			if err != nil {
 				continue
 			}

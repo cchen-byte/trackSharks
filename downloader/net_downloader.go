@@ -141,10 +141,16 @@ func determineEncoding(r *bufio.Reader) encoding.Encoding {
 	return encode
 }
 
+//
+//type NetDownloaderFactory struct {}
+//
+//func (netDownloaderFactory *NetDownloaderFactory) GetDownloader() Downloader {
+//	return &NetDownloader{
+//		Session: NewSession(),
+//	}
+//}
 
-type NetDownloaderFactory struct {}
-
-func (netDownloaderFactory *NetDownloaderFactory) GetDownloader() Downloader {
+func NewNetDownloader() *NetDownloader{
 	return &NetDownloader{
 		Session: NewSession(),
 	}

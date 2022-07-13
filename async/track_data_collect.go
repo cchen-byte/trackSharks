@@ -10,7 +10,6 @@ type TrackDataCollect interface {
 	Run(engine engine.Engine, trackerLogic constructor.TrackerLogic)
 }
 
-
 type testDataCollect struct {}
 func (tc *testDataCollect) Run(engine engine.Engine, trackerLogic constructor.TrackerLogic){
 	testTrackData := httpobj.TrackData{}
