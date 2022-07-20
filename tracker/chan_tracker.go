@@ -10,13 +10,14 @@ import (
 )
 
 type ChanTracker struct {
-	Downloader downloader.Downloader
+	downloader                downloader.Downloader
+	trackerMiddlewaresManager *middleware.Manager
 }
 
 // fetchWork 根据传入的 request 发起请求， 返回一个 response
 func (tracker *ChanTracker) fetchWork(request *httpobj.Request) (*httpobj.Response, error) {
 	log.Printf("Fetching %s\n", request.Url)
-	resp, err := tracker.Downloader.Fetch(request)
+	resp, err := tracker.downloader.Fetch(request)
 	if err != nil {
 		return nil, err
 	}
@@ -29,12 +30,12 @@ func (tracker *ChanTracker) parseWork(request *httpobj.Request, resp *httpobj.Re
 	return request.Callback(resp)
 }
 
-func (tracker *ChanTracker) Run(trackerMiddlewaresManager *middleware.Manager, request *httpobj.Request) (*httpobj.ParseResult, error) {
+func (tracker *ChanTracker) Run(request *httpobj.Request) (*httpobj.ParseResult, error) {
 	var downloadMiddlewares []middleware.Middlewares
 
 	// 获取该请求对应的中间件
 	var err error
-	downloadMiddlewares, err = trackerMiddlewaresManager.GetMiddlewares(request.DownloadMiddlewares)
+	downloadMiddlewares, err = tracker.trackerMiddlewaresManager.GetMiddlewares(request.DownloadMiddlewares)
 	if err != nil {
 		log.Printf("Get Middlewares error: %s, request.Url: %s\n", err.Error(), request.Url)
 		return nil, err
@@ -100,7 +101,8 @@ func handleResponse(resp *httpobj.Response) (*httpobj.ParseResult, error) {
 func CreateChanTracker(trackerDownloader downloader.Downloader, trackerMiddlewaresManager *middleware.Manager, schedulerTrackerChan chan *httpobj.Request, engine engine.Engine, ready scheduler.ReadyNotifier) {
 	// tracker 下载器使用爬虫对应的下载器
 	cTracker := &ChanTracker{
-		Downloader: trackerDownloader,
+		downloader:                trackerDownloader,
+		trackerMiddlewaresManager: trackerMiddlewaresManager,
 	}
 	go func(tracker *ChanTracker) {
 		for {
@@ -108,7 +110,7 @@ func CreateChanTracker(trackerDownloader downloader.Downloader, trackerMiddlewar
 			// 调度器内无请求则一直阻塞
 			request := <-schedulerTrackerChan
 
-			result, err := tracker.Run(trackerMiddlewaresManager, request)
+			result, err := tracker.Run(request)
 			if err != nil {
 				continue
 			}

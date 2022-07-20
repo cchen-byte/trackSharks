@@ -8,7 +8,6 @@ import (
 type Scheduler interface {
 	ReadyNotifier
 	Submit(*httpobj.Request) // 提交一个请求对象
-	// todo: 模块化
 	GetTrackerChan() chan *httpobj.Request	// 返回一个 schedulerTrackerChan
 	Run()
 }

@@ -144,7 +144,7 @@ func determineEncoding(r *bufio.Reader) encoding.Encoding {
 //
 //type NetDownloaderFactory struct {}
 //
-//func (netDownloaderFactory *NetDownloaderFactory) GetDownloader() Downloader {
+//func (netDownloaderFactory *NetDownloaderFactory) GetDownloader() downloader {
 //	return &NetDownloader{
 //		Session: NewSession(),
 //	}

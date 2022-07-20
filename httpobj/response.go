@@ -9,6 +9,7 @@ import (
 // Response 响应对象
 type Response struct {
 	Request    *Request
+	IsError    bool					// 是否有异常
 	StatusCode int
 	Url        string
 	Headers    map[string][]string

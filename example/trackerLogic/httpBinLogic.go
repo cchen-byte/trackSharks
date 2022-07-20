@@ -28,9 +28,7 @@ func (trackerLogic *HttpBinLogic1) ConstructFirstRequest (httpobj.TrackData) *ht
 // Parse 解析返回的响应
 func Parse(response *httpobj.Response) (*httpobj.ParseResult, error) {
 	respJsonDom, _ := response.GetJsonDom()
-	//if err != nil{
-	//
-	//}
+
 	tracId := respJsonDom.XpathOne("headers/X-Amzn-Trace-Id").InnerText()
 	itemData := &httpobj.Item{
 		"TracId": tracId,
