@@ -1,19 +1,24 @@
 package main
 
-import (
-	"fmt"
-	"github.com/cchen-byte/trackeSharkes/pkg/traceId"
-	"time"
-)
-
 func main() {
-	t := traceId.TraceId{}
-	for i:=1000; i<9000; i++ {
-		go func(i int) {
-			time.Sleep(time.Second)
-			fmt.Println(i, t.GetTraceId())
-		}(i)
-	}
-	time.Sleep(time.Second*21)
-
+	//mylist := list.New()
+	//mylist.PushBack(1)
+	//mylist.PushFront(2)
+	//
+	////for element := mylist.Front(); element != nil; element = element.Next() {
+	////	if element.Value != 1 {
+	////		mylist.Remove(element) //删除链表中值不为1的元素
+	////	}
+	////}
+	////
+	////for element := mylist.Front(); element != nil; element = element.Next() {
+	////	fmt.Println(element.Value) // 遍历输出当前链表中的元素
+	////}
+	//elementFront := mylist.Front()
+	//fmt.Println(elementFront.Value)
+	//
+	//elementback := elementFront.Next()
+	//fmt.Println(elementback.Value)
+	//cm := constructor.NewConstructorManager()
+	//cm.Run()
 }

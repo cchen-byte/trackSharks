@@ -2,6 +2,7 @@ package httpobj
 
 // BaseTrackData rpc/kafka 数据格式
 type BaseTrackData struct {
+	Id string `json:"id"`
 	TrackNumber string `json:"n"`
 	Lang string `json:"lang"`
 	UserId string `json:"userid"`

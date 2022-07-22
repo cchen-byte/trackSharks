@@ -1,21 +1,23 @@
 package pipeline
 
 import (
+	"encoding/json"
 	"github.com/cchen-byte/trackeSharkes/httpobj"
 	"log"
 )
 
 // NativeChanPipeline 原生打印管道
 type NativeChanPipeline struct {
-	itemChan chan *httpobj.Item
+	itemChan chan *httpobj.TrackItem
 }
 
-func (np *NativeChanPipeline) ProcessItem(item *httpobj.Item) error {
-	log.Printf("Native Got item: %v\n", item)
+func (np *NativeChanPipeline) ProcessItem(item *httpobj.TrackItem) error {
+	itemData, _ := json.Marshal(item)
+	log.Printf("Native Got item: %v\n", string(itemData))
 	return nil
 }
 
-func (np *NativeChanPipeline) SubmitItem(item *httpobj.Item) {
+func (np *NativeChanPipeline) SubmitItem(item *httpobj.TrackItem) {
 	np.itemChan <- item
 }
 
@@ -37,6 +39,6 @@ func (np *NativeChanPipeline) Run() {
 
 func NewNativeChanPipeline() *NativeChanPipeline {
 	return &NativeChanPipeline{
-		itemChan: make(chan *httpobj.Item),
+		itemChan: make(chan *httpobj.TrackItem),
 	}
 }

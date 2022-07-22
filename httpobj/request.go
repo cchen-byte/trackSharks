@@ -7,6 +7,7 @@ import (
 
 // Request 请求对象
 type Request struct {
+	RequestMeta *RequestMeta
 	Url     string
 	Method  string
 	Params  map[string]interface{} // get 请求参数
@@ -30,6 +31,12 @@ type Request struct {
 	Callback func(response *Response) (*ParseResult, error) // 回调函数
 }
 
+type RequestMeta struct {
+	RequestId string
+	Function []string
+	HasNextConstructorNode bool
+}
+
 func (request *Request) ToValues(args map[string]interface{}) string {
 	if args != nil && len(args) > 0 {
 		params := url.Values{}
@@ -40,7 +47,6 @@ func (request *Request) ToValues(args map[string]interface{}) string {
 	}
 	return ""
 }
-
 
 // MetaData 导出的字段
 type MetaData map[string]interface{}

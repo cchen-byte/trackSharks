@@ -1,7 +1,6 @@
 package yunexpress
 
 import (
-	"encoding/json"
 	"fmt"
 	exampleUtils "github.com/cchen-byte/trackeSharkes/example/utils"
 	"github.com/cchen-byte/trackeSharkes/httpobj"
@@ -11,9 +10,9 @@ import (
 	"strings"
 )
 
-func api5ConstructFirstRequest(trackData httpobj.TrackData) *httpobj.Request{
+func api5ConstructFirstRequest(reqMeta *httpobj.RequestMeta, trackData *httpobj.TrackData) *httpobj.Request{
 	var trackNumberQ []string
-	for _, v := range trackData{
+	for _, v := range *trackData{
 		trackNumberQ = append(trackNumberQ, v.TrackNumber)
 	}
 
@@ -29,22 +28,46 @@ func api5ConstructFirstRequest(trackData httpobj.TrackData) *httpobj.Request{
 			"trackData": trackData,
 		},
 		Callback: parseApi5TrackData,
+		RequestMeta: reqMeta,
 	}
 }
 
 func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error) {
-	fmt.Println(response.Text)
-	//webRoute := []string{"yunexpress_api_on_5"}
 	result := httpobj.NewParseResult()
+	response.Request.RequestMeta.Function = append(response.Request.RequestMeta.Function, fmt.Sprintf("yunexpress_api_5_%d", response.StatusCode))
 
 	// 异常判断
-	if !strings.Contains(response.Text, "item"){
-		response.IsError = true
+	if strings.Contains(response.Text, "item"){
+		// 无其他线路节点
+		if !response.Request.RequestMeta.HasNextConstructorNode {
+			returnData := &httpobj.TrackItem{}
+			returnData.NeedReTrack = true
+			returnData.Function = strings.Join(response.Request.RequestMeta.Function, " ,")
+			result.AppendItem(&httpobj.Item{
+				ItemStatus: &httpobj.ItemStatus{
+					RequestId: response.Request.RequestMeta.RequestId,
+				},
+				Item: returnData,
+			})
+			return result, nil
+
+		}else{
+			// 有其他节点
+			returnData := &httpobj.TrackItem{}
+			result.AppendItem(&httpobj.Item{
+				ItemStatus: &httpobj.ItemStatus{
+					RequestId: response.Request.RequestMeta.RequestId,
+					IsError: true,
+				},
+				Item: returnData,
+			})
+			return result, nil
+		}
 	}
 
 	// 正常逻辑
 	metaData := *(response.Request.MetaData)
-	trackData := metaData["trackData"].(httpobj.TrackData)
+	trackData := metaData["trackData"].(*httpobj.TrackData)
 
 	respJsonDom, _ := response.GetJsonDom()
 	respItemData := respJsonDom.Xpath("//Item/*")
@@ -59,14 +82,12 @@ func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error
 		var returnDataTrackInfo []*httpobj.TrackInfo
 		returnData := httpobj.NewTrackItem()
 
-		// todo: Function应由列表记录拼接
-		//returnData.Function = fmt.Sprintf("yunexpress_api_5_%d", response.StatusCode)
 		returnData.CountryName = itemData.XpathOne("//OriginCountryCode").InnerText()
 		returnData.DestinationCountry = itemData.XpathOne("//CountryCode").InnerText()
 		returnData.TrackInfo = returnDataTrackInfo
 
 		trackNumberSet := utils.NewMemorySet()
-		for _, v := range trackData{
+		for _, v := range *trackData{
 			_, _ = trackNumberSet.Add(v.TrackNumber)
 		}
 		// 判断单号是否在单号列表中（三种单号格式）
@@ -123,9 +144,15 @@ func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error
 			returnData.TrackInfo[itemLastIndex].SubStatusNum = 711
 			returnData.StatusDataNum = 7
 		}
-
-		returnDataJson, _ := json.Marshal(returnData)
-		fmt.Println(string(returnDataJson))
+		//returnDataJson, _ := json.Marshal(returnData)
+		//fmt.Println(string(returnDataJson))
+		returnData.Function = strings.Join(response.Request.RequestMeta.Function, " ,")
+		result.AppendItem(&httpobj.Item{
+			ItemStatus: &httpobj.ItemStatus{
+				RequestId: response.Request.RequestMeta.RequestId,
+			},
+			Item: returnData,
+		})
 	}
 	return result, nil
 }

@@ -1,10 +1,7 @@
 package async
 
-import (
-	"github.com/cchen-byte/trackeSharkes/constructor"
-	"github.com/cchen-byte/trackeSharkes/engine"
-)
+import "github.com/cchen-byte/trackeSharkes/httpobj"
 
 type TrackDataCollect interface {
-	Run(engine engine.Engine, trackerLogic constructor.TrackerLogic)
+	Run(chan *httpobj.TrackData)
 }

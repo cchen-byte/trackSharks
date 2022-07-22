@@ -4,6 +4,7 @@ import (
 	"github.com/cchen-byte/trackeSharkes/constructor"
 	"github.com/cchen-byte/trackeSharkes/downloader"
 	"github.com/cchen-byte/trackeSharkes/engine"
+	"github.com/cchen-byte/trackeSharkes/httpobj"
 	"github.com/cchen-byte/trackeSharkes/middleware"
 	"github.com/cchen-byte/trackeSharkes/pipeline"
 	"github.com/cchen-byte/trackeSharkes/scheduler"
@@ -12,7 +13,7 @@ import (
 )
 
 // RunAsync 异步查询
-func RunAsync(trackerLogic constructor.TrackerLogic) {
+func RunAsync() {
 	// 配置scheduler
 	asyncScheduler := scheduler.NewChanScheduler()
 	go asyncScheduler.Run()
@@ -21,8 +22,12 @@ func RunAsync(trackerLogic constructor.TrackerLogic) {
 	asyncPipeline := pipeline.NewNativeChanPipeline()
 	go asyncPipeline.Run()
 
+	//
+	engineConstructorChan := make(chan *httpobj.ItemStatus)
+
 	// 配置engine
-	asyncEngine := engine.NewChanEngine(asyncScheduler, asyncPipeline)
+	asyncEngine := engine.NewChanEngine(asyncScheduler, asyncPipeline, engineConstructorChan)
+	go asyncEngine.Run()
 
 	// 配置downloader
 	trackerDownloader := downloader.NewNetDownloader()
@@ -32,9 +37,20 @@ func RunAsync(trackerLogic constructor.TrackerLogic) {
 		tracker.CreateChanTracker(trackerDownloader, middleware.TrackerMiddlewaresManager, asyncScheduler.GetTrackerChan(), asyncEngine, asyncScheduler)
 	}
 
+	collectDataChan := make(chan *httpobj.TrackData)
 	// 配置数据读取器
 	dataCollect := &testDataCollect{}
-	go dataCollect.Run(asyncEngine, trackerLogic)
+	go dataCollect.Run(collectDataChan)
 
-	asyncEngine.Run()
+	// 线路管理器
+	cm := constructor.NewConstructorManager(engineConstructorChan)
+	go cm.Run(asyncEngine)
+
+	for {
+		select {
+		case collectData := <- collectDataChan:
+			cm.SubmitTrackData(collectData)
+		}
+	}
+
 }

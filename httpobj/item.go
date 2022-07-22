@@ -1,6 +1,21 @@
 package httpobj
 
-type Item map[string]interface{}
+type Item struct {
+	ItemStatus *ItemStatus
+	Item       *TrackItem
+}
+
+type ItemStatus struct {
+	RequestId string
+	IsError   bool
+}
+
+type KafkaItem struct {
+	TrackNumber string    `json:"n"`
+	Express     string    `json:"e"`
+	UserId      string    `json:"u"`
+	TrackItem   TrackItem `json:"d"`
+}
 
 type TrackInfo struct {
 	Date              string `json:"Date"`              // 时间        		| 可选
@@ -8,7 +23,7 @@ type TrackInfo struct {
 	Details           string `json:"Details"`           // 轨迹内容地点     	| 可选
 	CheckpointStatus  string `json:"checkpoint_status"` // 状态节点 状态时结果
 	SubStatus         string `json:"substatus"`         // 子状态 | 归属状态节点
-	SubStatusNum         int `json:"substatus_num"`     // 子状态 | 归属状态节点
+	SubStatusNum      int    `json:"substatus_num"`     // 子状态 | 归属状态节点
 	Keywords          string `json:"keywords"`          // 状态关键词
 	Type              int    `json:"Type"`              //
 }

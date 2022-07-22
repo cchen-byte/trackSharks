@@ -10,6 +10,7 @@ type ChanEngine struct {
 	trackerEngineChan chan *httpobj.ParseResult // tracker 向引擎推送数据管道
 	scheduler   scheduler.Scheduler // 任务调度器
 	pipeline pipeline.Pipeline
+	EngineConstructorChan chan *httpobj.ItemStatus
 }
 
 // SubmitRequests 向引擎推送 Request
@@ -33,7 +34,13 @@ func (e *ChanEngine) Run() {
 		case result := <-e.trackerEngineChan:
 			// 然后把 Tracker 解析出的 item 提交 Pipeline
 			for _, itemData := range result.Items {
-				go e.pipeline.SubmitItem(itemData)
+				// 无异常
+				if !itemData.ItemStatus.IsError{
+					go e.pipeline.SubmitItem(itemData.Item)
+				}
+				go func(itemData *httpobj.Item) {
+					e.EngineConstructorChan <- itemData.ItemStatus
+				}(itemData)
 			}
 
 			// 然后把 Tracker 解析出的 Request 提交 Scheduler
@@ -44,17 +51,12 @@ func (e *ChanEngine) Run() {
 	}
 }
 
-//type ChanEngineFactory struct {}
-//func (engine *ChanEngineFactory) GetEngine() Engine {
-//	return &ChanEngine{}
-//}
-
-
-func NewChanEngine(sc scheduler.Scheduler, p pipeline.Pipeline) *ChanEngine{
+func NewChanEngine(sc scheduler.Scheduler, p pipeline.Pipeline, ecchan chan *httpobj.ItemStatus) *ChanEngine{
 	return &ChanEngine{
 		trackerEngineChan: make(chan *httpobj.ParseResult),
 		scheduler: sc,
 		pipeline: p,
+		EngineConstructorChan: ecchan,
 	}
 }
 
