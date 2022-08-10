@@ -26,7 +26,7 @@ func (e *ChanEngine) SubmitParseResult(result *httpobj.ParseResult){
 }
 
 func (e *ChanEngine) Run() {
-	//e.trackerEngineChan = make(chan *httpobj.ParseResult)
+	// e.trackerEngineChan = make(chan *httpobj.ParseResult)
 	// 处理解析后的item以及request
 	for {
 		select {

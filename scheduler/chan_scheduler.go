@@ -77,6 +77,7 @@ func (scheduler *ChanScheduler) Run() {
 			case <- time.Tick(time.Millisecond*100):
 			}
 		}
+		
 	}()
 }
 

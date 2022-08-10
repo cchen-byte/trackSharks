@@ -41,7 +41,7 @@ func DoInitProducer() *kafka.Producer {
 		kafkaconf.SetKey("security.protocol", "plaintext")
 	case "SASL_SSL":
 		kafkaconf.SetKey("security.protocol", "sasl_ssl")
-		kafkaconf.SetKey("ssl.ca.location", "mq/kafka/ca-cert.pem")
+		kafkaconf.SetKey("ssl.ca.location", "../pkg/kafka/ca-cert.pem")
 		kafkaconf.SetKey("sasl.username", cfg.SaslUsername)
 		kafkaconf.SetKey("sasl.password", cfg.SaslPassword)
 		kafkaconf.SetKey("sasl.mechanism", cfg.SaslMechanism)
@@ -83,7 +83,7 @@ func doInitConsumer(cfg Config) *kafka.Consumer {
 		kafkaconf.SetKey("security.protocol", "plaintext")
 	case "SASL_SSL":
 		kafkaconf.SetKey("security.protocol", "sasl_ssl")
-		kafkaconf.SetKey("ssl.ca.location", "mq/kafka/ca-cert.pem")
+		kafkaconf.SetKey("ssl.ca.location", "ca-cert.pem")
 		kafkaconf.SetKey("sasl.username", cfg.SaslUsername)
 		kafkaconf.SetKey("sasl.password", cfg.SaslPassword)
 		kafkaconf.SetKey("sasl.mechanism", cfg.SaslMechanism)

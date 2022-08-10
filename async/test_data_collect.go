@@ -12,6 +12,16 @@ func (tc *testDataCollect) Run(collectDataChan chan *httpobj.TrackData){
 		UserId: "451",
 		Lang: "en",
 	}
+
+	testBaseTrackData2 := &httpobj.BaseTrackData{
+		TrackNumber: "YT2121721236014632",
+		UserId: "451",
+		Lang: "en",
+	}
 	testTrackData = append(testTrackData, testBaseTrackData)
+	testTrackData = append(testTrackData, testBaseTrackData2)
+	//testTrackData = append(testTrackData, testBaseTrackData2)
+	//testTrackData = append(testTrackData, testBaseTrackData2)
+	//testTrackData = append(testTrackData, testBaseTrackData2)
 	collectDataChan <- &testTrackData
 }

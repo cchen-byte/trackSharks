@@ -10,12 +10,23 @@ import (
 	"strings"
 )
 
+const express = "YunExpress"
+
+// 记录单号的用户信息
+var trackDataUser = map[string]*httpobj.BaseTrackData{}
+
 func api5ConstructFirstRequest(reqMeta *httpobj.RequestMeta, trackData *httpobj.TrackData) *httpobj.Request{
 	var trackNumberQ []string
 	for _, v := range *trackData{
-		trackNumberQ = append(trackNumberQ, v.TrackNumber)
+		trackNumber := v.TrackNumber
+		// 抽取 TrackNumber
+		trackNumberQ = append(trackNumberQ, trackNumber)
+
+		// 记录单号的用户信息
+		trackDataUser[trackNumber] = v
 	}
 
+	// 根据单号构建请求
 	return &httpobj.Request{
 		Url: "https://trackapi.yunexpress.com/LMS.API/api/waybill/gettracklist",
 		Method: "POST",
@@ -33,22 +44,32 @@ func api5ConstructFirstRequest(reqMeta *httpobj.RequestMeta, trackData *httpobj.
 }
 
 func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error) {
+	//fmt.Println(response.Text)
 	result := httpobj.NewParseResult()
 	response.Request.RequestMeta.Function = append(response.Request.RequestMeta.Function, fmt.Sprintf("yunexpress_api_5_%d", response.StatusCode))
 
 	// 异常判断
-	if strings.Contains(response.Text, "item"){
+	if !strings.Contains(response.Text, "item"){
 		// 无其他线路节点
 		if !response.Request.RequestMeta.HasNextConstructorNode {
-			returnData := &httpobj.TrackItem{}
+			returnData := &httpobj.TrackDataItem{}
 			returnData.NeedReTrack = true
 			returnData.Function = strings.Join(response.Request.RequestMeta.Function, " ,")
-			result.AppendItem(&httpobj.Item{
-				ItemStatus: &httpobj.ItemStatus{
-					RequestId: response.Request.RequestMeta.RequestId,
-				},
-				Item: returnData,
-			})
+
+			for _, trackNumber := range response.Request.Json.([]string){
+				result.AppendItem(&httpobj.Item{
+					ItemStatus: &httpobj.ItemStatus{
+						RequestId: response.Request.RequestMeta.RequestId,
+					},
+					Item: &httpobj.TrackItem{
+						TrackNumber: trackNumber,
+						Express: express,
+						UserId: trackDataUser[trackNumber].UserId,
+						TrackItem: returnData,
+					},
+				})
+				delete(trackDataUser, trackNumber)
+			}
 			return result, nil
 
 		}else{
@@ -80,7 +101,7 @@ func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error
 		carrierName := itemData.XpathOne("//CarrierName").InnerText()
 
 		var returnDataTrackInfo []*httpobj.TrackInfo
-		returnData := httpobj.NewTrackItem()
+		returnData := &httpobj.TrackDataItem{}
 
 		returnData.CountryName = itemData.XpathOne("//OriginCountryCode").InnerText()
 		returnData.DestinationCountry = itemData.XpathOne("//CountryCode").InnerText()
@@ -147,12 +168,19 @@ func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error
 		//returnDataJson, _ := json.Marshal(returnData)
 		//fmt.Println(string(returnDataJson))
 		returnData.Function = strings.Join(response.Request.RequestMeta.Function, " ,")
+
 		result.AppendItem(&httpobj.Item{
 			ItemStatus: &httpobj.ItemStatus{
 				RequestId: response.Request.RequestMeta.RequestId,
 			},
-			Item: returnData,
+			Item: &httpobj.TrackItem{
+				TrackNumber: trackNumberRow1,
+				Express: express,
+				UserId: trackDataUser[trackNumberRow1].UserId,
+				TrackItem: returnData,
+			},
 		})
+		delete(trackDataUser, trackNumberRow1)
 	}
 	return result, nil
 }
@@ -177,6 +205,9 @@ func parseApi5TrackData(response *httpobj.Response) (*httpobj.ParseResult, error
 //		Timeout: 10,
 //	}
 //	resp, _ := dl.Fetch(req)
+
+
+
 //	fmt.Println(resp.Text)
 //	var resultTrackItem httpobj.TrackItem
 //	err := json.Unmarshal(resp.Content, &resultTrackItem)

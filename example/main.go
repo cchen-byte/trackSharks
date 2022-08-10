@@ -5,7 +5,5 @@ import (
 )
 
 func main() {
-	//httpBinLogic := trackerLogic.NewLogic()
-	//httpBinLogic := yunexpress.NewYunExpressLogic()
 	async.RunAsync()
 }

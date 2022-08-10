@@ -10,11 +10,11 @@ type ItemStatus struct {
 	IsError   bool
 }
 
-type KafkaItem struct {
+type TrackItem struct {
 	TrackNumber string    `json:"n"`
 	Express     string    `json:"e"`
 	UserId      string    `json:"u"`
-	TrackItem   TrackItem `json:"d"`
+	TrackItem   *TrackDataItem `json:"d"`
 }
 
 type TrackInfo struct {
@@ -28,7 +28,7 @@ type TrackInfo struct {
 	Type              int    `json:"Type"`              //
 }
 
-type TrackItem struct {
+type TrackDataItem struct {
 	CountryName        string       `json:"countryname"`        // 发件国 | 可选
 	DestinationCountry string       `json:"destinationcountry"` // 目的国 | 可选
 	TrackInfo          []*TrackInfo `json:"trackinfo"`          // 轨迹数据

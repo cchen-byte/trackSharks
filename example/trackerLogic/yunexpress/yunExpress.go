@@ -1,7 +1,6 @@
 package yunexpress
 
 import (
-	"fmt"
 	"github.com/cchen-byte/trackeSharkes/httpobj"
 )
 
@@ -11,7 +10,7 @@ type Logic struct {
 }
 
 func (logic *Logic) ConstructFirstRequest (reqMeta *httpobj.RequestMeta, trackData *httpobj.TrackData) *httpobj.Request {
-	fmt.Println(logic.flag)
+	//fmt.Println(logic.flag)
 	return api5ConstructFirstRequest(reqMeta, trackData)
 	//return api2ConstructFirstRequest(trackData)
 }

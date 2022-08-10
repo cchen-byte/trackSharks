@@ -19,10 +19,11 @@ func RunAsync() {
 	go asyncScheduler.Run()
 
 	// 配置pipeline
-	asyncPipeline := pipeline.NewNativeChanPipeline()
+	//asyncPipeline := pipeline.NewNativeChanPipeline()
+	asyncPipeline := pipeline.NewKafkaPipeline()
 	go asyncPipeline.Run()
 
-	//
+	// 引擎向构造器管理器chan, 推送请求响应状态
 	engineConstructorChan := make(chan *httpobj.ItemStatus)
 
 	// 配置engine
@@ -52,5 +53,4 @@ func RunAsync() {
 			cm.SubmitTrackData(collectData)
 		}
 	}
-
 }

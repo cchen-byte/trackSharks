@@ -51,7 +51,7 @@ func sortTrackInfo(trackInfo []*httpobj.TrackInfo,low,high int)  {
 
  */
 
-func DealTrackInfoStatusAndLastInfoByFuc(returnData *httpobj.TrackItem, webRoute []string, normal bool, function []string) {
+func DealTrackInfoStatusAndLastInfoByFuc(returnData *httpobj.TrackDataItem, webRoute []string, normal bool, function []string) {
 	// 按查询时间降序排序
 	sortTrackInfo(returnData.TrackInfo, 0, len(returnData.TrackInfo)-1)
 
